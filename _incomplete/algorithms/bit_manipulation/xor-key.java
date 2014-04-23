@@ -9,6 +9,7 @@ public class Solution {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         //For each test
+        XorTree tree = new XorTree((byte)Short.SIZE);
         for(int T = Integer.parseInt(br.readLine()); T > 0; T--){
 
             //Get input
@@ -17,24 +18,24 @@ public class Solution {
             int Q = Integer.parseInt(temp[1]);
             short[] ar = new short[N]; 
             temp = br.readLine().split(" ");
-            for(int i = 0; i < N; i++){
+            for(int i = 0; i < N; ++i){
                 ar[i] = Short.parseShort(temp[i]);
             }
 
             //Initialize xor tree
-            XorTree tree = new XorTree((byte)Short.SIZE);
+            tree.clear();
             for(int i = 0; i < N; ++i){
-                tree.add(i, ar[i]);
+                tree.add(i+1, ar[i]);
             }
 
             //For each query
-            for(int i = 0; i < Q; i++){
+            for(int i = 0; i < Q; ++i){
 
                 //Get input
                 temp = br.readLine().split(" ");
                 short a = Short.parseShort(temp[0]);
-                int p = Integer.parseInt(temp[1]) - 1;
-                int q = Integer.parseInt(temp[2]) - 1;
+                int p = Integer.parseInt(temp[1]);
+                int q = Integer.parseInt(temp[2]);
 
                 //Get max xor value
                 short max = (short)tree.maxXor(a, p, q);
@@ -52,7 +53,8 @@ public class Solution {
         private long[] bitMasks;
 
         public XorTree(byte numBits){
-            numBits = (numBits < 1) ? (byte)1 : (numBits > Long.SIZE) ? (byte)Long.SIZE : numBits;
+            numBits = numBits < 1 ? (byte)1 : numBits;
+            numBits = numBits > Long.SIZE ? (byte)Long.SIZE : numBits;
             this.root = null;
             this.numBits = numBits;
             this.bitMasks = new long[numBits];
@@ -63,70 +65,84 @@ public class Solution {
         }
 
         public void add(int index, long val){
-            this.root = add(index, val, this.root, this.numBits);
-        }
-
-        private Node add(int index, long val, Node node, byte bit){
-            if (node == null){
-                node = new Node();
+            this.root = this.root == null ? new Node() : this.root;
+            this.root.add(index);
+            
+            Node node = this.root;
+            byte bit = this.numBits;
+            while (bit-- > 0){
+                node = ((val & this.bitMasks[bit]) == 0) ?
+                   (node.zero = (node.zero == null) ? new Node() : node.zero):
+                   (node.one  = (node.one  == null) ? new Node() : node.one );
+                node.add(index);
             }
-            node.add(index);
-            if (--bit >= 0){
-                if ((val & this.bitMasks[bit]) == 0){
-                    node.zero = add(index, val, node.zero, bit);
+        }
+        
+        private long maxXor(long n, int minIndex, int maxIndex){
+            if (this.root == null || !this.root.hasIndexInRange(minIndex, maxIndex)){
+                return -1L;
+            }
+            
+            long xor = 0L;
+            Node node = this.root;
+            byte bit = this.numBits;
+            while (bit-- > 0){
+                long mask = this.bitMasks[bit];
+                if ((n & mask) == 0){
+                    if (node.one != null && node.one.hasIndexInRange(minIndex, maxIndex)){
+                        xor += mask;
+                        node = node.one;
+                    } else {
+                        node = node.zero;
+                    }
+                } else if (node.zero != null && node.zero.hasIndexInRange(minIndex, maxIndex)){
+                    xor += mask;
+                    node = node.zero;
                 } else {
-                    node.one = add(index, val, node.one, bit);
+                    node = node.one;
                 }
             }
-            return node;
+            
+            return xor;
         }
 
-        public long maxXor(long n, int minIndex, int maxIndex){
-            return  this.root == null ||
-                    !this.root.hasIndexInRange(minIndex, maxIndex) ?
-                    -1L :
-                    maxXor(n, minIndex, maxIndex, this.root, this.numBits, 0L);
-        }
-
-        private long maxXor(long n, int minIndex, int maxIndex, Node node, byte bit, long xor){
-            if (--bit < 0){
-                return xor;
-            }
-            long mask = this.bitMasks[bit];
-            if ((n & mask) == 0){
-                return node.one != null && node.one.hasIndexInRange(minIndex, maxIndex) ?
-                        maxXor(n, minIndex, maxIndex, node.one, bit, xor + mask) :
-                        maxXor(n, minIndex, maxIndex, node.zero, bit, xor);
-            }
-            return node.zero != null && node.zero.hasIndexInRange(minIndex, maxIndex) ?
-                    maxXor(n, minIndex, maxIndex, node.zero, bit, xor + mask) :
-                    maxXor(n, minIndex, maxIndex, node.one, bit, xor);
+        public void clear(){
+            this.root = null;
         }
 
         public static class Node{
             public Node one;
             public Node zero;
             private List<Integer> indices;
+
             public Node(){
                 this.one = null;
                 this.zero = null;
                 this.indices = new ArrayList<Integer>();
             }
+
             public void add(int index){
-                this.indices.add(index);
+                int size = this.indices.size();
+                if (size < 1 || this.indices.get(size-1) < index){
+                    this.indices.add(index);
+                } else {
+                    int i = binarySearch(this.indices, index, 0, size);
+                    if (i < 0){
+                        this.indices.add(-i - 1, index);
+                    }
+                }
             }
+
             public boolean hasIndexInRange(int minIndex, int maxIndex){
                 int size = indices.size();
                 minIndex = binarySearch(this.indices, minIndex, 0, size);
                 if (minIndex >= 0){
                     return true;
                 }
-                maxIndex = binarySearch(this.indices, maxIndex, -minIndex, size);
-                if (maxIndex >= 0){
-                    return true;
-                }
-                return minIndex != maxIndex;
+                maxIndex = binarySearch(this.indices, maxIndex, -minIndex - 1, size);
+                return (maxIndex < 0) ? minIndex != maxIndex : true;
             }
+
             private int binarySearch(List<Integer> list, int val, int min, int max){
                 while (min < max){
                     int mid = min + (max - min)/2;
@@ -140,7 +156,7 @@ public class Solution {
                         min = mid + 1;
                     }
                 }
-                return -min;
+                return -min - 1;
             }
         }
     }
@@ -161,4 +177,22 @@ public class Solution {
 ---
 107 = 1101011
 111 = 1101111 ?
+*/
+
+/*
+1  | 0000001
+2  | 0000010
+3  | 0000011
+4  | 0000100
+5  | 0000101
+6  | 0000110
+7  | 0000111
+8  | 0001000
+9  | 0001001
+10 | 0001010
+11 | 0001011
+12 | 0001100
+13 | 0001101
+14 | 0001110
+15 | 0001111
 */
