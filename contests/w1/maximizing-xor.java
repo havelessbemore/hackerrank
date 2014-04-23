@@ -66,7 +66,7 @@ Add 1 to our current answer for a total of 3.
 Seeing as how we go through every bit to the largest one, instead
 of finding the largest first, just go from smallest to largest until
 our bit's decimal equivalent is larger than our upper bound.
-*/
+
 import java.io.*;
 
 public class Solution {
@@ -85,10 +85,34 @@ public class Solution {
         return max;
     }
 }
-/*
+
 Now the only small issue is the need for a larger type for pow to avoid overflow possibility.
 There are other ways, like http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
 but they use lookup tables and I'd rather not for this problem. You could use Math library
 and take the log base 2 of R, then double pow that many times, but according to other people
 this method is neither fast nor precise (http://stackoverflow.com/questions/3305059/how-do-you-calculate-log-base-2-in-java-for-integers)
+
+Update: The program can be cleaned up if you realize two things:
+    - When you overflow you can tell since you'll go from positive to negative.
+    - Once pow gets big enough for L/pow == R/pow, you'll just be adding zeros.
 */
+import java.io.*;
+
+public class Solution {
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        short L = Short.parseShort(br.readLine());
+        short R = Short.parseShort(br.readLine());
+        short out = maxXor(L, R);
+        System.out.print(out);
+    }
+
+    private static short maxXor(short L, short R) {
+        short max = 0;
+        for(short pow = 1; pow > 0 && L/pow != R/pow; pow <<= 1){
+            max += pow;
+        }
+        return max;
+    }
+}
