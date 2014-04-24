@@ -9,8 +9,8 @@ public class Solution {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         //For each test
-        XorTree tree = new XorTree((byte)Short.SIZE);
-        for(int T = Integer.parseInt(br.readLine()); T > 0; T--){
+        XorTree tree = new XorTree((byte)(Short.SIZE - 1), new short[0]);
+        for(int T = Integer.parseInt(br.readLine()); T > 0; --T){
 
             //Get input
             String[] temp = br.readLine().split(" ");
@@ -23,10 +23,7 @@ public class Solution {
             }
 
             //Initialize xor tree
-            tree.clear();
-            for(int i = 0; i < N; ++i){
-                tree.add(i+1, ar[i]);
-            }
+            tree.reset(ar);
 
             //For each query
             for(int i = 0; i < Q; ++i){
@@ -34,8 +31,8 @@ public class Solution {
                 //Get input
                 temp = br.readLine().split(" ");
                 short a = Short.parseShort(temp[0]);
-                int p = Integer.parseInt(temp[1]);
-                int q = Integer.parseInt(temp[2]);
+                int p = Integer.parseInt(temp[1]) - 1;
+                int q = Integer.parseInt(temp[2]) - 1;
 
                 //Get max xor value
                 short max = (short)tree.maxXor(a, p, q);
@@ -50,44 +47,52 @@ public class Solution {
     private static class XorTree{
         private Node root;
         private byte numBits;
-        private long[] bitMasks;
+        private short[] bitMasks;
 
-        public XorTree(byte numBits){
+        private XorTree(byte numBits){
             numBits = numBits < 1 ? (byte)1 : numBits;
-            numBits = numBits > Long.SIZE ? (byte)Long.SIZE : numBits;
+            numBits = numBits > Short.SIZE ? (byte)Short.SIZE : numBits;
             this.root = null;
             this.numBits = numBits;
-            this.bitMasks = new long[numBits];
+            this.bitMasks = new short[numBits];
             this.bitMasks[0] = 1;
             for(byte i = 1; i < numBits; ++i){
                 bitMasks[i] = bitMasks[i-1] << 1L;
             }
         }
 
-        public void add(int index, long val){
-            this.root = this.root == null ? new Node() : this.root;
-            this.root.add(index);
-            
-            Node node = this.root;
-            byte bit = this.numBits;
-            while (bit-- > 0){
-                node = ((val & this.bitMasks[bit]) == 0) ?
-                   (node.zero = (node.zero == null) ? new Node() : node.zero):
-                   (node.one  = (node.one  == null) ? new Node() : node.one );
-                node.add(index);
+        public XorTree(byte numBits, short[] ar){
+            this(numBits);
+            reset(ar);
+        }
+
+        public void reset(short[] ar){
+            this.root = new Node();
+            int n = ar.length;
+            for(int index = 0; index < n; ++index){
+                short val = ar[index];
+                this.root.add(index);
+                Node node = this.root;
+                byte bit = this.numBits;
+                while (bit-- > 0){
+                    node = ((val & this.bitMasks[bit]) == 0) ?
+                       (node.zero = (node.zero == null) ? new Node() : node.zero):
+                       (node.one  = (node.one  == null) ? new Node() : node.one );
+                    node.add(index);
+                }
             }
         }
-        
-        private long maxXor(long n, int minIndex, int maxIndex){
-            if (this.root == null || !this.root.hasIndexInRange(minIndex, maxIndex)){
+
+        private short maxXor(short n, int minIndex, int maxIndex){
+            if (!this.root.hasIndexInRange(minIndex, maxIndex)){
                 return -1L;
             }
             
-            long xor = 0L;
+            short xor = 0L;
             Node node = this.root;
             byte bit = this.numBits;
             while (bit-- > 0){
-                long mask = this.bitMasks[bit];
+                short mask = this.bitMasks[bit];
                 if ((n & mask) == 0){
                     if (node.one != null && (node.zero == null || node.one.hasIndexInRange(minIndex, maxIndex))){
                         xor += mask;
@@ -106,31 +111,28 @@ public class Solution {
             return xor;
         }
 
-        public void clear(){
-            this.root = null;
-        }
-
         public static class Node{
             public Node one;
             public Node zero;
-            private List<Integer> indices;
+            private int size;
+            private int[] indices;
 
             public Node(){
                 this.one = null;
                 this.zero = null;
-                this.indices = new ArrayList<Integer>();
+                this.size = 0;
+                this.indices = new int[2];
             }
 
             public void add(int index){
-                int size = this.indices.size();
-                if (size < 1 || this.indices.get(size-1) < index){
-                    this.indices.add(index);
-                } else {
-                    int i = binarySearch(this.indices, index, 0, size);
-                    if (i < 0){
-                        this.indices.add(-i - 1, index);
+                if (size == this.indices.length){
+                    int[] ar = new int[size << 1];
+                    for(int i = 0; i < size; ++i){
+                        ar[i] = this.indices[i];
                     }
+                    this.indices = ar;
                 }
+                this.indices[size++] = index;
             }
 
             public boolean hasIndexInRange(int minIndex, int maxIndex){
