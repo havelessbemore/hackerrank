@@ -1,28 +1,15 @@
 //https://www.hackerrank.com/contests/w1/challenges/maximizing-xor
 /*
-import java.io.*;
-
-public class Solution {
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        short L = Short.parseShort(br.readLine());
-        short R = Short.parseShort(br.readLine());
-        short out = maxXor(L, R);
-        System.out.print(out);
-    }
-
-    private static short maxXor(short L, short R) {
-        //Probably not the best way, will optimize later
-        short max = 0;
-        for(short a = L; a <= R; ++a){
-            for(short b = a+1; b <= R; ++b){
-                short xor = (short)(a ^ b);
-                max = xor > max ? xor : max;
-            }
+private static short maxXor(short L, short R) {
+    //Probably not the best way, will optimize later
+    short max = 0;
+    for(short a = L; a <= R; ++a){
+        for(short b = a+1; b <= R; ++b){
+            short xor = (short)(a ^ b);
+            max = xor > max ? xor : max;
         }
-        return max;
     }
+    return max;
 }
 
 1  | 0001
@@ -67,23 +54,12 @@ Seeing as how we go through every bit to the largest one, instead
 of finding the largest first, just go from smallest to largest until
 our bit's decimal equivalent is larger than our upper bound.
 
-import java.io.*;
-
-public class Solution {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        short L = Short.parseShort(br.readLine());
-        short R = Short.parseShort(br.readLine());
-        short out = maxXor(L, R);
-        System.out.print(out);
+private static short maxXor(short L, short R) {
+    short max = 0;
+    for(int pow = 1; pow <= R; pow <<= 1){
+        max += (L/pow == R/pow) ? 0 : pow;
     }
-    private static short maxXor(short L, short R) {
-        short max = 0;
-        for(int pow = 1; pow <= R; pow <<= 1){
-            max += (L/pow == R/pow) ? 0 : pow;
-        }
-        return max;
-    }
+    return max;
 }
 
 Now the only small issue is the need for a larger type for pow to avoid overflow possibility.
@@ -95,6 +71,19 @@ this method is neither fast nor precise (http://stackoverflow.com/questions/3305
 Update: The program can be cleaned up if you realize two things:
     - When you overflow you can tell since you'll go from positive to negative.
     - Once pow gets big enough for L/pow == R/pow, you'll just be adding zeros.
+
+    private static short maxXor(short L, short R) {
+        short max = 0;
+        for(short pow = 1; pow > 0 && L/pow != R/pow; pow <<= 1){
+            max += pow;
+        }
+        return max;
+    }
+
+Update: The program can be cleaned up further if you realize another three things:
+    - We're dividing by powers of 2 from 1 to 2^num_bits. Instead let's shift.
+    - Eventually we'll shift all the bits and both numbers will equal zero.
+    - We're adding powers of 2 to max from 1 to 2^num_bits. Instead let's shift.
 */
 import java.io.*;
 
@@ -110,8 +99,10 @@ public class Solution {
 
     private static short maxXor(short L, short R) {
         short max = 0;
-        for(short pow = 1; pow > 0 && L/pow != R/pow; pow <<= 1){
-            max += pow;
+        while (L != R){
+            L >>= 1;
+            R >>= 1;
+            max = (short)((max << 1) + 1);
         }
         return max;
     }
