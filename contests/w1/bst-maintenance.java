@@ -35,49 +35,55 @@ public class Solution{
         }
         
         public void add(int value){
-            //Hold path from direct parent to root node
+            
+            //Insert node if empty
+            if (this.root == null){
+                this.root = new Node(value);
+                return;
+            }
+            
+            //Hold path from root node to parent node
             List<Node> parents = new ArrayList<Node>();
-            //Hold siblings at each depth from same depth to depth 1
-            List<Node> siblings = new ArrayList<Node>();
             
-            //Add the new value
-            this.root = add(this.root, value, parents, siblings);
+            //Find where to place the node
+            Node node = this.root;
+            do {
+                
+                node.size++;
+                parents.add(node);
+                
+                if (value < node.value){
+                    if (node.left == null){
+                        node = node.left = new Node(value);
+                        break;
+                    }
+                    node = node.left;
+                } else {
+                    if (node.right == null){
+                        node = node.right = new Node(value);
+                        break;
+                    }
+                    node = node.right;
+                }
+                
+            } while (true);
             
-            //For each depth
-            int size = parents.size();
-            for(int i = 0; i < size; ++i){
+            //From parent node to root
+            int depth = 0;
+            for(int i = parents.size() - 1; i >= 0; --i){
                 Node parent = parents.get(i);
-                Node sibling = siblings.get(i);
-                int depth = i+1;
                 
                 //Update parent distance with distance to node
-                parent.distance += depth;
+                parent.distance += ++depth;
                 
                 //Update tree distance with:
-                //    Distance from node to parent
-                //    Distance from node to sibling * the number of nodes in sibling subtree
-                //    Sum of distance from sibling node to every subnode
-                this.treeDistance += sibling == null ? depth : depth + ((long)(depth+1))*sibling.size + sibling.distance;
+                //    Distance from node to parent * the number of nodes in sibling subtree
+                //    Sum of distance from sibling subtree
+                this.treeDistance += ((long)depth)*(parent.size - node.size) + (parent.distance - node.distance - node.size);
+                
+                //Move up the tree
+                node = parent;
             }
-        }
-        
-        private Node add(Node node, int value, List<Node> parents, List<Node> siblings){
-            if (node == null){
-                return new Node(value);
-            }
-            
-            if (value < node.value){
-                node.left = add(node.left, value, parents, siblings);
-                siblings.add(node.right);
-            } else {
-                node.right = add(node.right, value, parents, siblings);
-                siblings.add(node.left);
-            }
-            
-            node.size++;
-            parents.add(node);
-            
-            return node;
         }
         
         public long getDistance(){
