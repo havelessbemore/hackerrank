@@ -1,5 +1,47 @@
 //https://www.hackerrank.com/challenges/binomial-coefficients
 //See: http://www.math.hmc.edu/funfacts/ffiles/30002.4-5.shtml
+
+/*
+
+//Updated version using BigInteger
+
+import java.io.*;
+import java.math.*;
+
+public class Solution{
+    
+    public static void main(String[] args) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        
+        for(byte T = Byte.parseByte(br.readLine()); T > 0; --T){
+            String[] temp = br.readLine().split(" ");
+            BigInteger N = new BigInteger(temp[0]);
+            BigInteger P = new BigInteger(temp[1]);
+            
+            BigInteger R = BigInteger.ONE;
+            BigInteger NP1 = N.add(BigInteger.ONE);
+            while (N.compareTo(P) >= 0){
+                BigInteger[] ar = N.divideAndRemainder(P);
+                BigInteger quotient = ar[0];
+                BigInteger remainder = ar[1];
+                R = R.multiply(remainder.add(BigInteger.ONE));
+                N = quotient;
+            }
+            R = R.multiply(N.add(BigInteger.ONE));
+            R = NP1.subtract(R);
+            
+            sb.append(R + "\n");
+        }
+        
+        System.out.print(sb);
+    }
+}
+
+*/
+
+//Original version using custom Number class
+
 import java.io.*;
 
 public class Solution{
