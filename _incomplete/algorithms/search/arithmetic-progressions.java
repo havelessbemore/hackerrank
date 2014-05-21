@@ -1,0 +1,1 @@
+//https://www.hackerrank.com/challenges/arithmetic-progressions
