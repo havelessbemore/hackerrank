@@ -16,7 +16,7 @@ public class Solution {
         }
         T = null;
         
-        long sum = 0L;
+        long count = 0L;
         
         //Go through array
         //Get length of longest sorted subarray
@@ -24,12 +24,12 @@ public class Solution {
         int i = 0;
         while (i < N){
             long j = i;
-            while (++i < N && A[i] >= A[i-1]){
+            while (++i < N && A[i] > A[j]){
             }
             j = i - j;
-            sum += (j * (j+1)) / 2;
+            count += (j * (j+1)) / 2;
         }
         
-        System.out.print(sum);
+        System.out.print(count);
     }
 }
