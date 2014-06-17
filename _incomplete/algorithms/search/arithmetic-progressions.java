@@ -1,6 +1,4 @@
 //https://www.hackerrank.com/challenges/arithmetic-progressions
-import java.io.*;
-import java.util.*;
 //
 //Definitions:
 //   f(a, d) = {a, a + d, a + 2d, ...}
@@ -62,6 +60,9 @@ import java.util.*;
 //   Finally, extending from this:
 //   G(a1, a2, ..., aN, d1, d2, ..., dN, p1, p2, ..., pN) = (d1^p1 * d2^p2 * ... * dN^pN) * (p1 + p2 + ... + pN)!
 //
+import java.io.*;
+import java.util.*;
+
 public class Solution{
 	public static void main(String[] args) throws IOException{
 		StringBuffer sb = new StringBuffer();
