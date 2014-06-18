@@ -1,3 +1,4 @@
+//Week 1, Wednesday
 //https://www.hackerrank.com/contests/w1/challenges/p-sequences
 import java.io.*;
 import java.util.*;

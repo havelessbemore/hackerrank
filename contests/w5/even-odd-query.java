@@ -1,3 +1,4 @@
+//Week 5, Monday
 //https://www.hackerrank.com/contests/w5/challenges/even-odd-query
 import java.io.*;
 import java.util.*;

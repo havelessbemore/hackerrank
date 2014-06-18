@@ -1,3 +1,4 @@
+//Week 2, Tuesday
 //https://www.hackerrank.com/contests/w2/challenges/cut-the-tree
 import java.io.*;
 import java.util.*;

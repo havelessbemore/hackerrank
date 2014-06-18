@@ -1,3 +1,4 @@
+//Week 1, Monday
 //https://www.hackerrank.com/contests/w1/challenges/maximizing-xor
 /*
 private static short maxXor(short L, short R) {

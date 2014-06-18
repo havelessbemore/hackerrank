@@ -1,3 +1,4 @@
+//Week 2, Monday
 //https://www.hackerrank.com/contests/w2/challenges/manasa-and-stones
 import java.io.*;
 

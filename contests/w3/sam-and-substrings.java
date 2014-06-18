@@ -1,3 +1,4 @@
+//Week 2, Tuesday
 //https://www.hackerrank.com/contests/w3/challenges/sam-and-substrings
 import java.io.*;
 
