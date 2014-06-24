@@ -1,6 +1,6 @@
 //https://www.hackerrank.com/challenges/arithmetic-progressions
 //
-//Definitions:
+//Defbuildions:
 //   f(a, d) = {a, a + d, a + 2d, ...}
 //   F(a, d, p) = {(a)^p, (a + d)^p, (a + 2d)^p, ...}
 //   G(a1, a2, ..., aN, d1, d2, ..., dN, p1, p2, ..., pN) =  F(a1, d1, p1) * F(a2, d2, p2) * ... * F(aN, dN, pN)
@@ -64,6 +64,9 @@ import java.io.*;
 import java.util.*;
 
 public class Solution{
+
+	private final static int MOD = 1000003;
+
 	public static void main(String[] args) throws IOException{
 		StringBuffer sb = new StringBuffer();
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -71,21 +74,163 @@ public class Solution{
 		//Get input
 		int N = Integer.parseInt(br.readLine());
 		short[] D = new short[N];
-		short[] P = new short[N];
+		int[] P = new int[N];
+        int[] DP = new int[N];
 		for(int n = 0; n < N; ++n){
 			String[] temp = br.readLine().split(" ");
-			//A
 			D[n] = Short.parseShort(temp[1]);
-			P[n] = Short.parseShort(temp[2]);
+			P[n] = Integer.parseInt(temp[2]);
+            DP[n] = pow(D[n], P[n], MOD);
 		}
 
+		//Initialize
+		RSQ pSums = new RSQ(P);
+        P = null;
+		FactorialCache facts = new FactorialCache(MOD);
 
-
+		//For each query
 		for(int Q = Integer.parseInt(br.readLine()); Q > 0; --Q){
 			String[] temp = br.readLine().split(" ");
-			int I = Integer.parseInt(temp[1]);
-			int J = Integer.parseInt(temp[2]);
-			//...
+			int I = Integer.parseInt(temp[1]) - 1;
+			int J = Integer.parseInt(temp[2]) - 1;
+			
+			//If update
+			if (temp.length > 3){
+				short V = Short.parseShort(temp[3]);
+                pSums.update(I, J, V);
+            
+			//If query
+			} else {
+				long K = pSums.query(I, J);
+				long V = facts.get(K);
+                V *= 1;
+				sb.append(K + " " + V + "\n");
+			}
+		}
+
+		//Print
+		System.out.print(sb);
+	}
+    
+    private static int pow(int base, int power, int mod){
+        //Assumes base > 0
+        //Assumes power > 0
+        
+        //Get max bit set of b
+        byte bit = (byte)Math.floor(Math.log(power)/Math.log(2));
+        
+        //Get product
+        long prod = 1;
+        for(int mask = 1 << bit; mask > 0; mask >>= 1){
+            prod = (prod * prod) % mod;
+            prod = ((power & mask) == 0) ? prod : (prod * base) % mod;
+        }
+        return (int)prod;
+    }
+
+	public static class FactorialCache{
+		
+		private int mod;
+		private ArrayList<Integer> factorials;
+
+		public FactorialCache(int mod){
+			this.mod = mod;
+			this.factorials = new ArrayList<Integer>(mod);
+			factorials.add(1);
+			factorials.add(1);
+		}
+
+		public int get(long index){
+
+			if (index < 0 || index >= mod){
+				return 0;
+			}
+
+			for(int len = this.factorials.size(); len <= index; ++len){
+                long prod = len;
+                prod = (prod * this.factorials.get(len - 1)) % mod;
+				this.factorials.add((int)prod);
+			}
+
+			return this.factorials.get((int)index);
+		}
+	}
+
+	public static abstract class SegmentTree{
+		protected int len;
+		protected long[] data;
+
+		public SegmentTree(int[] arr){
+			this.len = arr.length;
+			int height = (int)Math.ceil(Math.log(this.len)/Math.log(2));
+			int size = (int)(Math.pow(2, height + 1) - 1);
+			this.data = new long[size];
+			build(arr, 0, this.len - 1, this.data, 0);
+		}
+        
+		protected static int leftChild(int i){
+			return 2*i + 1;
+		}
+
+		protected static int rightChild(int i){
+			return 2*(i + 1);
+		}
+
+		public abstract long query(int left, int right);
+		public abstract void update(int left, int right, int val);
+		protected abstract long build(int[] arr, int minA, int maxA, long[] data, int indexD);
+	}
+
+	//Range Sum Query
+	public static class RSQ extends SegmentTree{
+
+		public RSQ(int[] arr){
+			super(arr);
+		}
+
+		protected long build(int[] arr, int minA, int maxA, long[] data, int indexD){
+            if (minA == maxA){
+				return data[indexD] = arr[minA]; 
+			}
+			int midA = minA + (maxA - minA)/2;
+			return data[indexD] = build(arr, minA, midA, data, leftChild(indexD))
+					+ build(arr, midA + 1, maxA, data, rightChild(indexD));
+		}
+
+		public long query(int left, int right){
+			return query(this.data, 0, this.len - 1, left, right, 0);
+		}
+
+		private static long query(long[] data, int minD, int maxD, int left, int right, int index){
+			if (left <= minD && right >= maxD){
+				return data[index];
+			}
+
+			if (right < minD || left > maxD){
+				return 0;
+			}
+
+			int midD = minD + (maxD - minD)/2;
+			return query(data, minD, midD, left, right, leftChild(index))
+					+ query(data, midD + 1, maxD, left, right, rightChild(index));
+		}
+
+		public void update(int left, int right, int val){
+			update(this.data, 0, this.len - 1, left, right, val, 0);
+		}
+
+		private static long update(long[] data, int minD, int maxD, int left, int right, int val, int index){
+			if (right < minD || left > maxD){
+				return data[index];
+			}
+
+			if (minD == maxD){
+				return data[index] += val;
+			}
+
+			int midD = minD + (maxD - minD)/2;
+			return data[index] = update(data, minD, midD, left, right, val, leftChild(index))
+					+ update(data, midD + 1, maxD, left, right, val, rightChild(index));
 		}
 	}
 }
