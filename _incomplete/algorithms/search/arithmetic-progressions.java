@@ -8,6 +8,8 @@
 //
 //Problem: Find how many derivatives is needed before constant value; also find the constant value
 //
+// Easiest explanation (personal opinion):
+//
 //Work:
 //   Let x = f(a1, d1) and y = f(a2, d2):
 //   G(a1, a2, d1, d2, p1, p2) 
@@ -15,6 +17,7 @@
 //      = f(a1, d1) ^ p1 * f(a2, d2) ^ p2
 //      = x ^ p1 * y ^ p2
 //
+// G = F(a1, d1, p1) *
 //Example 1: Let p1 = 1 and p2 = 1:
 //   G   = xy
 //   G'  = y + x
@@ -61,7 +64,6 @@
 //   G(a1, a2, ..., aN, d1, d2, ..., dN, p1, p2, ..., pN) = (d1^p1 * d2^p2 * ... * dN^pN) * (p1 + p2 + ... + pN)!
 //
 import java.io.*;
-import java.util.*;
 
 public class Solution{
 
@@ -86,6 +88,7 @@ public class Solution{
 		//Initialize
 		RSQ pSums = new RSQ(P);
         P = null;
+        RPQ dpProds = new RPQ(DP, MOD);
 		FactorialCache facts = new FactorialCache(MOD);
 
 		//For each query
@@ -98,13 +101,15 @@ public class Solution{
 			if (temp.length > 3){
 				short V = Short.parseShort(temp[3]);
                 pSums.update(I, J, V);
-            
+                for(int i = I; i <= J; ++i){
+                    DP[i] = pow(D[i], V, MOD);
+                }
+                dpProds.update(I, J, DP, 0);
 			//If query
 			} else {
-				long K = pSums.query(I, J);
-				long V = facts.get(K);
-                V *= 1;
-				sb.append(K + " " + V + "\n");
+				int K = (int)pSums.query(I, J);
+				long V = (dpProds.query(I, J) * facts.get(K)) % MOD;
+				sb.append(String.format("%d %d\n", K, V));
 			}
 		}
 
@@ -113,124 +118,157 @@ public class Solution{
 	}
     
     private static int pow(int base, int power, int mod){
-        //Assumes base > 0
-        //Assumes power > 0
-        
-        //Get max bit set of b
-        byte bit = (byte)Math.floor(Math.log(power)/Math.log(2));
-        
-        //Get product
-        long prod = 1;
-        for(int mask = 1 << bit; mask > 0; mask >>= 1){
-            prod = (prod * prod) % mod;
-            prod = ((power & mask) == 0) ? prod : (prod * base) % mod;
+        if (power < 2){
+            return base % mod;
         }
-        return (int)prod;
+        long sq = pow(base, power >> 1, mod);
+        sq = (sq * sq) % mod;
+        return ((power & 1) == 0) ? (int)sq : (int)((sq * base) % mod);
     }
 
 	public static class FactorialCache{
 		
 		private int mod;
-		private ArrayList<Integer> factorials;
+        private int size;
+		private int[] factorials;
 
 		public FactorialCache(int mod){
+            this.size = 2;
 			this.mod = mod;
-			this.factorials = new ArrayList<Integer>(mod);
-			factorials.add(1);
-			factorials.add(1);
+			this.factorials = new int[mod];
+			factorials[0] = 1;
+            factorials[1] = 1;
 		}
 
-		public int get(long index){
+		public int get(int index){
 
 			if (index < 0 || index >= mod){
 				return 0;
 			}
+            
+            while (size <= index){
+                long prod = size;
+                prod = (prod * this.factorials[size - 1]) % this.mod;
+                this.factorials[size++] = (int)prod;
+            }
 
-			for(int len = this.factorials.size(); len <= index; ++len){
-                long prod = len;
-                prod = (prod * this.factorials.get(len - 1)) % mod;
-				this.factorials.add((int)prod);
-			}
-
-			return this.factorials.get((int)index);
+			return this.factorials[index];
 		}
 	}
 
 	public static abstract class SegmentTree{
 		protected int len;
+		protected long dfault;
 		protected long[] data;
+		protected long[] lazy;
 
-		public SegmentTree(int[] arr){
+		protected SegmentTree(int[] arr, long dfault){
+			this.dfault = dfault;
 			this.len = arr.length;
 			int height = (int)Math.ceil(Math.log(this.len)/Math.log(2));
-			int size = (int)(Math.pow(2, height + 1) - 1);
+			int size = (1 << (height + 1)) - 1;
 			this.data = new long[size];
-			build(arr, 0, this.len - 1, this.data, 0);
+			this.lazy = new long[size];
+            for(int i = 0; i < size; lazy[i++] = dfault){
+            }
 		}
         
-		protected static int leftChild(int i){
-			return 2*i + 1;
+        protected abstract long aggregate(long a, long b);
+        
+        protected long build(int[] arr, int minA, int maxA, int indexD){
+            if (minA == maxA){
+				return data[indexD] = arr[minA]; 
+			}
+			int midA = minA + (maxA - minA)/2;
+			return data[indexD] = aggregate(build(arr, minA, midA, 2*indexD + 1), build(arr, midA + 1, maxA, 2*(indexD + 1)));
+		}
+        
+        public long query(int left, int right){
+			return query(0, this.len - 1, left, right, 0);
+		}
+        
+        public void update(int left, int right, int val){
+			update(0, this.len - 1, left, right, val, 0);
+		}
+        
+		protected long query(int minD, int maxD, int left, int right, int index){
+			if (left <= minD && right >= maxD){
+				return data[index];
+			}
+
+			if (right < minD || left > maxD){
+				return this.dfault;
+			}
+
+			int midD = minD + (maxD - minD)/2;
+			return aggregate(query(minD, midD, left, right, 2*index + 1), query(midD + 1, maxD, left, right, 2*(index + 1)));
+		}
+        
+		protected long update(int minD, int maxD, int left, int right, int val, int index){
+			if (right < minD || left > maxD){
+				return data[index];
+			}
+
+			if (minD == maxD){
+				return data[index] = aggregate(data[index], val);
+			}
+
+			int midD = minD + (maxD - minD)/2;
+			return data[index] = aggregate(update(minD, midD, left, right, val, 2*index + 1), update(midD + 1, maxD, left, right, val, 2*(index + 1)));
 		}
 
-		protected static int rightChild(int i){
-			return 2*(i + 1);
+        public void update(int left, int right, int[] vals){
+			update(0, this.len - 1, left, right, vals, 0, left);
 		}
 
-		public abstract long query(int left, int right);
-		public abstract void update(int left, int right, int val);
-		protected abstract long build(int[] arr, int minA, int maxA, long[] data, int indexD);
+		public void update(int left, int right, int[] vals, int offset){
+			update(0, this.len - 1, left, right, vals, 0, offset);
+		}
+        
+        protected long update(int minD, int maxD, int left, int right, int[] vals, int index, int offset){
+			if (right < minD || left > maxD){
+				return data[index];
+			}
+
+			if (minD == maxD){
+				return data[index] = aggregate(data[index], vals[minD - offset]);
+			}
+
+			int midD = minD + (maxD - minD)/2;
+			return data[index] = aggregate(
+                update(minD, midD, left, right, vals, 2*index + 1, offset), 
+                update(midD + 1, maxD, left, right, vals, 2*(index + 1), offset)
+            );
+		}
 	}
 
 	//Range Sum Query
 	public static class RSQ extends SegmentTree{
 
 		public RSQ(int[] arr){
-			super(arr);
+			super(arr, 0L);
+			build(arr, 0, this.len - 1, 0);
 		}
+        
+        protected long aggregate(long a, long b){
+            return a + b;
+        }
 
-		protected long build(int[] arr, int minA, int maxA, long[] data, int indexD){
-            if (minA == maxA){
-				return data[indexD] = arr[minA]; 
-			}
-			int midA = minA + (maxA - minA)/2;
-			return data[indexD] = build(arr, minA, midA, data, leftChild(indexD))
-					+ build(arr, midA + 1, maxA, data, rightChild(indexD));
+	}
+
+	//Range Product Query
+	public static class RPQ extends SegmentTree{
+
+		private int mod;
+
+		public RPQ(int[] arr, int mod){
+			super(arr, 1L);
+			this.mod = mod;
+			build(arr, 0, this.len - 1, 0);
 		}
-
-		public long query(int left, int right){
-			return query(this.data, 0, this.len - 1, left, right, 0);
-		}
-
-		private static long query(long[] data, int minD, int maxD, int left, int right, int index){
-			if (left <= minD && right >= maxD){
-				return data[index];
-			}
-
-			if (right < minD || left > maxD){
-				return 0;
-			}
-
-			int midD = minD + (maxD - minD)/2;
-			return query(data, minD, midD, left, right, leftChild(index))
-					+ query(data, midD + 1, maxD, left, right, rightChild(index));
-		}
-
-		public void update(int left, int right, int val){
-			update(this.data, 0, this.len - 1, left, right, val, 0);
-		}
-
-		private static long update(long[] data, int minD, int maxD, int left, int right, int val, int index){
-			if (right < minD || left > maxD){
-				return data[index];
-			}
-
-			if (minD == maxD){
-				return data[index] += val;
-			}
-
-			int midD = minD + (maxD - minD)/2;
-			return data[index] = update(data, minD, midD, left, right, val, leftChild(index))
-					+ update(data, midD + 1, maxD, left, right, val, rightChild(index));
-		}
+        
+        protected long aggregate(long a, long b){
+            return (a * b) % this.mod;
+        }
 	}
 }
