@@ -7,10 +7,10 @@ public class Solution{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         
         //Get N
-        byte N = Byte.parseByte(br.readLine());
+        final byte N = Byte.parseByte(br.readLine());
         
         //Get A
-        final int[] A = new int[N];
+        int[] A = new int[N];
         String[] input = br.readLine().split(" ");
         for(byte i = 0; i < N; ++i){
             A[i] = Integer.parseInt(input[i]);
@@ -28,7 +28,7 @@ public class Solution{
         System.out.print(maxMin);
     }
     
-    private static int solve(int[] A, byte N, int P, int Q){
+    private static int solve(int[] A, int N, final int P, final int Q){
         
         //If P = Q
         if (P == Q){
@@ -39,7 +39,7 @@ public class Solution{
         Arrays.sort(A);
         
         //Remove duplicates
-        N = (byte)unDup(A);
+        N = unDup(A);
         
         //Look for start and end index
         int i = Arrays.binarySearch(A, 0, N, P);
