@@ -38,7 +38,7 @@ public class Solution{
             return N;
         }
         
-        long count = 1L;
+        long count = N;
         
         //Initialize
         int numTops = 1;
@@ -55,7 +55,6 @@ public class Solution{
         
         //For every value in A
         for (int i = 1; i < N; ++i){
-            ++count;
             int val = A[i];
             
             //If upslope
@@ -85,7 +84,6 @@ public class Solution{
                 
                 //Ride slope to bottom
                 while (++i < N && A[i] < A[i-1]){
-                    ++count;
                 }
                 
                 //Get the valley's bottom
