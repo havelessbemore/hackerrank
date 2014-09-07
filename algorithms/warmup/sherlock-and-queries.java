@@ -1,4 +1,4 @@
-https://www.hackerrank.com/challenges/sherlock-and-queries
+//https://www.hackerrank.com/challenges/sherlock-and-queries
 import java.io.*;
 import java.util.*;
 
