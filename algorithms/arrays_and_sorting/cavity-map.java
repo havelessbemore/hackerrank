@@ -42,6 +42,6 @@ public class Solution {
                 sb.append("\n");
             }
         }
-        System.out.println(sb);
+        System.out.print(sb);
     }
 }
