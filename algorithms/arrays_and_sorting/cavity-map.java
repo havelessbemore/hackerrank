@@ -1,49 +1,46 @@
 //https://www.hackerrank.com/challenges/cavity-map
 import java.io.*;
-import java.util.*;
 
-public class Solution{
+public class Solution {
+
     public static void main(String[] args) throws IOException {
+        
+        //INPUT
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        final byte N = Byte.parseByte(br.readLine());
+        final char[][] matrix = new char[N][N];
+        for(byte y = 0; y < N; matrix[y++] = br.readLine().toCharArray()){}
+        br.close();
+        br = null;
         
-        //Input
-        byte N = Byte.parseByte(br.readLine());
-        char[][] matrix = new char[N][];
-        for(byte i = 0; i < N; ++i){
-            matrix[i] = br.readLine().toCharArray();
-        }
+        //SOLVE
         
-        //Solve
-        
-        //Find cavities
-        int max = N-1;
-        List<Byte> cavX = new ArrayList<Byte>();
-        List<Byte> cavY = new ArrayList<Byte>();
-        for(byte y = 1; y < max; ++y){
-            for(byte x = 1; x < max; ++x){
-                char depth = matrix[y][x];
-                if (depth > matrix[y-1][x]
-                    && depth > matrix[y+1][x]
-                    && depth > matrix[y][x-1]
-                    && depth > matrix[y][x+1]
+        //No cavity can be on the edge of
+        //the matrix, so start at index 1
+        //and end at index N-1 for y and x
+        final byte MAX = (byte)(N-1);
+        for(byte y = 1; y < MAX; ++y){
+            for(byte x = 1; x < MAX; ++x){
+                final char cur = matrix[y][x];
+                if (cur > matrix[y-1][x] 
+                 && cur > matrix[y][x+1]
+                 && cur > matrix[y+1][x]
+                 && cur > matrix[y][x-1]
                 ){
-                    cavY.add(y);
-                    cavX.add(x);
+                    //Take advantage that numbers
+                    //come before alphabet; 'X' > '9'
+                    matrix[y][x] = 'X';
                 }
             }
         }
         
-        //Mark cavities
-        int size = cavY.size();
-        for(int i = 0; i < size; ++i){
-            matrix[cavY.get(i)][cavX.get(i)] = 'X';
-        }
-        
-        //Output
-        StringBuffer sb = new StringBuffer();
-        for(byte i = 0; i < N; ++i){
-            sb.append(new String(matrix[i]));
-            sb.append("\n");
+        //OUTPUT
+        final StringBuffer sb = new StringBuffer();
+        for(byte y = 0; y < N;){
+            sb.append(matrix[y]);
+            if (++y < N){
+                sb.append("\n");
+            }
         }
         System.out.print(sb);
     }
