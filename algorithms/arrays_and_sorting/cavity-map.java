@@ -1,4 +1,3 @@
-//https://www.hackerrank.com/challenges/cavity-map
 import java.io.*;
 
 public class Solution {
@@ -22,14 +21,23 @@ public class Solution {
         for(byte y = 1; y < MAX; ++y){
             for(byte x = 1; x < MAX; ++x){
                 final char cur = matrix[y][x];
-                if (cur > matrix[y-1][x] 
-                 && cur > matrix[y][x+1]
-                 && cur > matrix[y+1][x]
-                 && cur > matrix[y][x-1]
-                ){
-                    //Take advantage that numbers
-                    //come before alphabet; 'X' > '9'
-                    matrix[y][x] = 'X';
+                
+                //Check if cavity
+                if (cur > matrix[y][x+1]){ //Right
+                    if (cur > matrix[y-1][x] //Top
+                     && cur > matrix[y][x-1] //Left
+                     && cur > matrix[y+1][x] //Bottom
+                    ){
+                        
+                        //Mark as cavity.
+                        //Take advantage that numbers
+                        //come before alphabet; 'X' > '9'
+                        matrix[y][x] = 'X';
+                    }
+                    
+                    //Skip next index since it 
+                    //can't be cavity (cur > right)
+                    ++x;
                 }
             }
         }
