@@ -3,31 +3,27 @@ import java.io.*;
 
 public class Solution {
     public static void main(String[] args) throws IOException{
-        int N = 26;
-        int OFFSET = 97;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int[] count = new int[N];
+        System.out.print(isPalindromePermutation(br.readLine()) ? "YES" : "NO");
+        br.close();
+    }
+    
+    // Check if input is permutation of a palindrome
+    // For definition of a palindrome, see: https://en.wikipedia.org/wiki/Palindrome
+    private static boolean isPalindromePermutation(String str){
+        char[] chars = str.toCharArray();
         
-        //Count character occurrences
-        char[] chars = br.readLine().toCharArray();
-        for(char c : chars){
-            count[c - OFFSET]++;
-        }
+        //Track even-ness of letters
+        int bits = 0;
         
-        //Make sure each character occurs an even number of times
-        //Except for one if the string's length is odd
-        boolean isPalindrome = true;
-        boolean isOddCharFound = false;
-        boolean isEvenLength = (chars.length & 1) == 0;
-        for(int v : count){
-            if ((v&1) == 1){
-                if (isEvenLength || isOddCharFound){
-                    isPalindrome = false;
-                    break;
-                }
-                isOddCharFound = true;
-            }
-        }
-        System.out.print(isPalindrome ? "YES" : "NO");
+        //For every character in the input string
+        //Get the character's ASCII code and update bits
+        int strLen = chars.length;
+        for(int i = 0; i < strLen; bits = bits ^ (1 << (chars[i++] - 'a'))){}
+        
+        //Check if palindrome:
+        //   - Iff str length is even, no letter can appear an odd amount of times
+        //   - Iff str length is odd, one letter must appear an odd amount of times
+        return (bits & (bits - (strLen & 1))) == 0;
     }
 }
