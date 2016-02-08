@@ -8,7 +8,7 @@ public class Solution {
     //Get time
     String time = br.readLine();
     
-    //Get hour and adjust based on AM/PM
+    //Get hour
     byte hour = Byte.parseByte(time.substring(0, 2));
     
     //If noon or midnight
@@ -16,7 +16,7 @@ public class Solution {
       hour = 0;
     }
     
-    //Add 12 hours to afternoon
+    //Add 12 hours to afternoon (PM)
     if("P".equals(time.substring(8, 9))){
       hour += 12;
     }
