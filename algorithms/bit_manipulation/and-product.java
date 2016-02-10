@@ -17,7 +17,7 @@ public class Solution {
       //Get output
       long C = B - A;
       for(long t = C; (t = C & (C-1)) > 0; C = t){}
-      C = A & B & (-(C << 1));
+      C = A & B & -(C << 1);
       
       //Print output
       sb.append(C).append("\n");
