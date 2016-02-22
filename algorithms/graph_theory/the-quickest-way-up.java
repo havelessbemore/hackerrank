@@ -7,21 +7,21 @@ public class Solution {
   private final static byte BOARD_LEN = 100;
 
   public static void main(String[] args) throws IOException {
-    final StringBuffer sb = new StringBuffer();
     final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
+    
+    //Create board
+    final byte[] board = new byte[BOARD_LEN];
+    
     //For every test case
     for(byte T = Byte.parseByte(br.readLine()); T > 0; --T){
 
       //Initialize board
-      final byte[] board = new byte[BOARD_LEN];
       for(byte i = 0; i < BOARD_LEN; ++i){
         board[i] = i;
       }
 
       //Get snakes
-      final byte N = Byte.parseByte(br.readLine());
-      for(byte i = 0; i < N; ++i){
+      for(byte N = Byte.parseByte(br.readLine()); N > 0; --N){
         final String[] line = br.readLine().split(" ");
         final byte S = (byte)(Byte.parseByte(line[0]) - 1);
         final byte E = (byte)(Byte.parseByte(line[1]) - 1);
@@ -29,8 +29,7 @@ public class Solution {
       }
 
       //Get ladders
-      final byte M = Byte.parseByte(br.readLine());
-      for(byte i = 0; i < M; ++i){
+      for(byte M = Byte.parseByte(br.readLine()); M > 0; --M){
         final String[] line = br.readLine().split(" ");
         final byte S = (byte)(Byte.parseByte(line[0]) - 1);
         final byte E = (byte)(Byte.parseByte(line[1]) - 1);
@@ -39,9 +38,8 @@ public class Solution {
 
 
       //Solve and print output
-      sb.append(getMinMoves(board) + "\n");
+      System.out.println(getMinMoves(board));
     }
-    System.out.print(sb);
   }
 
   private static byte getMinMoves(final byte[] board){
