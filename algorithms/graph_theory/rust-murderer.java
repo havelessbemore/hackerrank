@@ -71,18 +71,4 @@ public class Solution {
     
     return distances;
   }
-  
-  private static class Road implements Comparable<Road> {
-    public final int cityId;
-    public final int distance;
-    
-    public Road(final int cityId, final int distance){
-      this.cityId = cityId;
-      this.distance = distance;
-    }
-    
-    public int compareTo(final Road b){
-      return Integer.compare(this.distance, b.distance);
-    }
-  }
 }
