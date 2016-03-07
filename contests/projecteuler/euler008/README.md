@@ -9,8 +9,10 @@ Find the greatest product of ***K*** consecutive digits in the ***N*** digit num
 
 Input Format
 ------------
-First line contains ***T*** that denotes the number of test cases. 
+First line contains ***T*** that denotes the number of test cases.
+
 First line of each test case will contain two integers ***N*** & ***K***.
+
 Second line of each test case will contain a ***N*** digit integer.
 
 Output Format
