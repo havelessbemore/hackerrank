@@ -1,4 +1,5 @@
 //https://www.hackerrank.com/challenges/sherlock-and-valid-string
+//https://www.hackerrank.com/contests/101hack26/challenges/sherlock-and-valid-string
 import java.io.*;
 import java.util.Arrays;
 
