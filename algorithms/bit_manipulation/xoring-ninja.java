@@ -25,9 +25,10 @@ public class Solution {
             
             //Get xorSum
             int xorSum = 0;
+            final int x = powMod(2, N-1, MOD);
             for(byte i = 0; bits > 0; ++i){
                 if((bits & 1) == 1){
-                    xorSum = (xorSum + powMod(2, N - 1 + i, MOD)) % MOD;
+                    xorSum = (int)((xorSum + (((long)x) << i)) % MOD);
                 }
                 bits >>= 1;
             }
