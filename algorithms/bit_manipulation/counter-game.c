@@ -9,15 +9,17 @@ int main() {
     short winner;
     unsigned long N;
     
-    //FOR EACH TEST CASE
+    //For each test case...
     scanf("%hd\n", &T);
     while (T-- > 0){
+        
+        //Get input
         scanf("%lu\n", &N);
         
-        //SOLVE
+        //Set initial winner
         winner = 1;
         
-        //Remove powers of two
+        //Remove powers of two and toggle winner
         while((N & 1) == 0){
             winner ^= 1;
             N >>= 1UL;
@@ -26,13 +28,13 @@ int main() {
         //Don't count remaining 1
         --N;
         
-        //Remove biggest powers of two (read: count set bits)
+        //Remove biggest powers of two (read: count set bits) and toggle winner
         while (N > 0UL){
             winner ^= 1;
             N &= (N - 1UL);
         }
         
-        //OUTPUT
+        //Print output
         printf("%s\n", (winner == 0) ? P0 : P1);
     }
     
