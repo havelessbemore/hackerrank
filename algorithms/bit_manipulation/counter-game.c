@@ -1,10 +1,5 @@
 //https://www.hackerrank.com/challenges/counter-game
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-
-short logTwo(unsigned long);
 
 const char* P0 = "Louise";
 const char* P1 = "Richard";
@@ -21,9 +16,20 @@ int main() {
         
         //SOLVE
         winner = 1;
-        while (N > 1L){
+        
+        //Remove powers of two
+        while((N & 1) == 0){
             winner ^= 1;
-            N -= 1UL << logTwo(N - 1UL);
+            N >>= 1UL;
+        }
+        
+        //Don't count remaining 1
+        --N;
+        
+        //Remove biggest powers of two (read: count set bits)
+        while (N > 0UL){
+            winner ^= 1;
+            N &= (N - 1UL);
         }
         
         //OUTPUT
@@ -31,13 +37,4 @@ int main() {
     }
     
     return 0;
-}
-
-short logTwo(unsigned long n){
-    short maxBit = -1;
-    while (n > 0){
-        n >>= 1;
-        ++maxBit;
-    }
-    return maxBit;
 }
