@@ -1,1 +1,0 @@
-//https://www.hackerrank.com/challenges/coin-on-the-table
