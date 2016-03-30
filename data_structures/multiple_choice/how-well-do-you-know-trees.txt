@@ -1,0 +1,3 @@
+//https://www.hackerrank.com/challenges/how-well-do-you-know-trees
+Q: If we have a tree of n nodes, how many edges will it have?
+A: n-1
