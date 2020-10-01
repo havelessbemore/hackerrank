@@ -34,3 +34,17 @@ public class Solution {
         System.out.println(res);
     }
 }
+
+------------------------------------------------
+    
+Python-Solution:-
+    
+from collections import Counter
+n=int(input())
+l=list(map(int,input().split()))
+d=Counter(l)
+for i,j in d.items():
+    if j==1:
+        print(i)
+        break
+ -------------------------------------------------
